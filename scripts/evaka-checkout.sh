@@ -19,6 +19,12 @@ if [ ! -d "$EVAKA_DIR/.git" ]; then
 fi
 cd "$EVAKA_DIR"
 git remote set-url origin "$EVAKA_REPO"
-git fetch origin "$EVAKA_REF"
-git checkout --force --detach FETCH_HEAD
+# A branch or tag is fetched by name; a commit (also abbreviated) is looked
+# up after fetching everything
+if git fetch origin "$EVAKA_REF" 2>/dev/null; then
+  git checkout --force --detach FETCH_HEAD
+else
+  git fetch origin
+  git checkout --force --detach "$EVAKA_REF"
+fi
 git log -1 --format='eVaka at %H (%cd) %s'
