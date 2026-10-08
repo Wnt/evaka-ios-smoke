@@ -13,6 +13,10 @@ on:
         description: eVaka branch, tag or commit to test
         default: master
         required: false
+      evaka_repo:
+        description: eVaka repository to test, for example a fork
+        default: https://github.com/espoon-voltti/evaka.git
+        required: false
 
 concurrency:
   group: ios-smoke
@@ -27,6 +31,7 @@ jobs:
     timeout-minutes: 90
     env:
       EVAKA_REF: ${{ inputs.evaka_ref || 'master' }}
+      EVAKA_REPO: ${{ inputs.evaka_repo || 'https://github.com/espoon-voltti/evaka.git' }}
     steps:
       - uses: actions/checkout@v7
       # Outside the workspace so that node_modules, the gradle caches and
