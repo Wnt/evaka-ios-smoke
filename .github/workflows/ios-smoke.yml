@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2017-2026 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+name: iOS smoke tests
+
+on:
+  schedule:
+    - cron: '0 5,11,17 * * *'
+  workflow_dispatch:
+    inputs:
+      evaka_ref:
+        description: eVaka branch, tag or commit to test
+        default: master
+        required: false
+
+concurrency:
+  group: ios-smoke
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ios-smoke:
+    runs-on: [self-hosted, macOS, ios-smoke]
+    timeout-minutes: 90
+    env:
+      EVAKA_REF: ${{ inputs.evaka_ref || 'master' }}
+    steps:
+      - uses: actions/checkout@v7
+      # Outside the workspace so that node_modules, the gradle caches and
+      # .appium survive between runs
+      - name: Set the eVaka directory
+        run: echo "EVAKA_DIR=$HOME/evaka-ios-smoke/evaka" >> "$GITHUB_ENV"
+      - name: Check out eVaka
+        run: scripts/evaka-checkout.sh
+      - name: Start eVaka
+        run: scripts/stack-up.sh
+      - name: Run the iOS smoke tests
+        run: scripts/run-smoke.sh
+      - name: Upload the results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-smoke-results
+          path: results/
+          if-no-files-found: ignore
+      - name: Stop eVaka
+        if: always()
+        run: scripts/stack-down.sh
