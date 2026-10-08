@@ -68,11 +68,12 @@ Prerequisites:
 - [mise](https://mise.jdx.dev/) installed at `~/.local/bin/mise`
   (`curl https://mise.run | sh`); it installs node, yarn, java and pm2 from
   eVaka's `mise.toml`
-- Docker with the compose plugin, for example with colima:
-  `brew install colima docker docker-compose` (and add Homebrew's
-  `cli-plugins` directory to `cliPluginsExtraDirs` in `~/.docker/config.json`
-  as brew instructs). `stack-up.sh` runs `colima start` when `docker info`
-  fails.
+- Docker with the compose plugin, for example with colima: on Apple Silicon
+  `brew install colima docker docker-compose`, on an Intel Mac (Homebrew no
+  longer supports it) `sudo port install colima docker docker-compose-plugin`
+  from MacPorts. Add the package manager's `cli-plugins` directory to
+  `cliPluginsExtraDirs` in `~/.docker/config.json` so that `docker compose`
+  works. `stack-up.sh` runs `colima start` when `docker info` fails.
 - The default eVaka ports free (frontend 9099, apigw 3000, service 8888,
   dummy IdP 9090, Postgres 5432 and the other compose services)
 

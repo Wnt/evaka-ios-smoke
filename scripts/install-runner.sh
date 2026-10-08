@@ -16,8 +16,9 @@ set -eu
 REPO_URL=https://github.com/Wnt/evaka-ios-smoke
 RUNNER_DIR="${RUNNER_DIR:-$HOME/actions-runner}"
 
-for tool in "$HOME/.local/bin/mise" /opt/homebrew/bin/colima /usr/bin/xcrun; do
-  [ -x "$tool" ] || echo "warning: $tool not found, the tests need it" >&2
+PATH="$HOME/.local/bin:/opt/homebrew/bin:/opt/local/bin:/usr/local/bin:$PATH"
+for tool in mise colima docker xcrun; do
+  command -v "$tool" >/dev/null || echo "warning: $tool not found, the tests need it" >&2
 done
 
 case "$(uname -m)" in
@@ -48,7 +49,12 @@ fi
 if [ ! -f .service ]; then
   ./svc.sh install
 fi
-if ! ./svc.sh status | grep -q '^Started:'; then
-  ./svc.sh start
-fi
+
+# svc.sh loads the LaunchAgent into the session it runs in. Over ssh that is
+# a background session without the window server, so the agent is bootstrapped
+# into the GUI session of the logged-in user instead.
+plist="$HOME/Library/LaunchAgents/$(cat .service)"
+uid=$(id -u)
+launchctl bootout "gui/$uid/$(basename "$plist" .plist)" 2>/dev/null || true
+launchctl bootstrap "gui/$uid" "$plist"
 ./svc.sh status
