@@ -49,3 +49,14 @@ jobs:
       - name: Stop eVaka
         if: always()
         run: scripts/stack-down.sh
+      # A Slack incoming webhook for #evaka-alerts-ios-smoke, stored as the
+      # repository secret SLACK_WEBHOOK_URL
+      - name: Alert Slack
+        if: failure() || cancelled()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TEXT: >-
+            :red_circle: iOS smoke tests ${{ job.status }} on eVaka `${{ env.EVAKA_REF }}`
+            (${{ github.event_name }}, runner ${{ runner.name }}):
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: scripts/slack-alert.sh

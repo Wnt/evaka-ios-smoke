@@ -152,3 +152,10 @@ the tests work and how to recover a stuck simulator.
 ## Licence
 
 LGPL-2.1-or-later, the same as eVaka. See [LICENSE](LICENSE).
+
+## Alerts
+
+A failed or cancelled run posts to the Slack channel #evaka-alerts-ios-smoke
+through an incoming webhook stored as the repository secret
+`SLACK_WEBHOOK_URL` (`gh secret set SLACK_WEBHOOK_URL --repo Wnt/evaka-ios-smoke`).
+Without the secret the alert step only prints the message.
