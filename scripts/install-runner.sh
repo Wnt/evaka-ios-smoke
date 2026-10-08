@@ -52,9 +52,13 @@ fi
 
 # svc.sh loads the LaunchAgent into the session it runs in. Over ssh that is
 # a background session without the window server, so the agent is bootstrapped
-# into the GUI session of the logged-in user instead.
+# into the GUI session of the logged-in user instead, which from ssh only
+# works as root.
 plist="$HOME/Library/LaunchAgents/$(cat .service)"
 uid=$(id -u)
-launchctl bootout "gui/$uid/$(basename "$plist" .plist)" 2>/dev/null || true
-launchctl bootstrap "gui/$uid" "$plist"
+if launchctl print "gui/$uid/$(basename "$plist" .plist)" >/dev/null 2>&1; then
+  echo "The runner is already loaded in the GUI session"
+else
+  sudo launchctl bootstrap "gui/$uid" "$plist"
+fi
 ./svc.sh status
